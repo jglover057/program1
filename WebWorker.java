@@ -56,13 +56,12 @@ public void run()
       InputStream  is = socket.getInputStream();//start the input stream
       OutputStream os = socket.getOutputStream();//start the output stream
       temp = readHTTPRequest(is);//get the path of the file from readHTTPRequest
+      writeHTTPHeader(os,contentType);//write the header
       if(contentType.contains("html")){
          String content = writeStuff(temp);//get the content of the file
          writeContent(os,content);
-         writeHTTPHeader(os,contentType);//write the header
          }
       else if(contentType.contains("image")){
-         writeHTTPHeader(os,contentType);//write the header
          SendImage(os);
          }
       os.flush();//push to page
