@@ -31,6 +31,8 @@ public class WebWorker implements Runnable
 {
 private int notFound = 0;
 private Socket socket;
+String contentType = "text/html";
+String path;
 
 /**
 * Constructor: must have a valid open socket
@@ -54,9 +56,15 @@ public void run()
       InputStream  is = socket.getInputStream();//start the input stream
       OutputStream os = socket.getOutputStream();//start the output stream
       temp = readHTTPRequest(is);//get the path of the file from readHTTPRequest
-      String content = writeStuff(temp);//get the content of the file
-      writeHTTPHeader(os,"text/html");//write the header
-      writeContent(os,content);//check for 404 or continue
+      if(contentType.contains("html")){
+         String content = writeStuff(temp);//get the content of the file
+         writeContent(os,content);
+         writeHTTPHeader(os,contentType);//write the header
+         }
+      else if(contentType.contains("image")){
+         writeHTTPHeader(os,contentType);//write the header
+         SendImage(os);
+         }
       os.flush();//push to page
       socket.close();//close socket
    } catch (Exception e) {
@@ -104,13 +112,21 @@ private String readHTTPRequest(InputStream is)
 {
    String line;
    String [] split;
-   String path = "";
    try{
    BufferedReader r = new BufferedReader(new InputStreamReader(is));//read the input of the stream
          while (!r.ready()) Thread.sleep(1);
          line = r.readLine();//read line
 	      split = line.split(" ");//split at the space to seperate the path
 	      path = split[1];//grab the path
+         if(path.contains("gif")){
+            contentType = "image/gif";
+            }
+         else if(path.contains("jpeg")){
+            contentType = "image/jpeg";
+            }
+         else if(path.contains("png")){
+            contentType = "image/png";
+            }
          }
          catch (Exception e){//if it couldn't be found, 404
             System.err.println("Request error; "+e);
@@ -138,7 +154,7 @@ private void writeHTTPHeader(OutputStream os, String contentType) throws Excepti
    os.write("Date: ".getBytes());
    os.write((df.format(d)).getBytes());
    os.write("\n".getBytes());
-   os.write("Server: Jon's very own server\n".getBytes());
+   os.write("Server: Jay's server\n".getBytes());
    //os.write("Last-Modified: Wed, 08 Jan 2003 23:11:55 GMT\n".getBytes());
    //os.write("Content-Length: 438\n".getBytes()); 
    os.write("Connection: close\n".getBytes());
@@ -162,5 +178,13 @@ private void writeContent(OutputStream os, String content) throws Exception
       os.write(content.getBytes());
    }
  }
-
+private void SendImage(OutputStream os) throws Exception{
+   InputStream file = new FileInputStream(path.substring(1));
+   double filesize = new File(path.substring(1)).length();
+   byte [] tester = new byte [(int)filesize];
+   int image = file.read(tester);
+      while(image>0){
+         os.write(tester,0,image);
+         }
+}
 } // end class

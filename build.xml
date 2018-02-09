@@ -3,4 +3,18 @@
     <target name="compile">
         <javac srcdir="." destdir="."/>
     </target>
+    <target name="jar" depends="compile">
+	<jar destfile="WebServer.jar" basedir=".">
+		<manifest>
+			<attribute name="Main-Class" value="WebServer"/>
+		</manifest>
+	</jar>
+    </target>
+
+    <target name ="run" depends="jar">
+	<java jar="WebServer.jar" fork="true"/>
+    </target>
+
+	
+	
 </project>
